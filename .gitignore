@@ -1,5 +1,9 @@
 # datasets
 datasets/
 
-# swp files
+# misc
+__pycache__/
 *.swp
+
+# dirs
+misc/
