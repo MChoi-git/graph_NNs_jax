@@ -12,7 +12,6 @@ from load_dset import load_graph_data
 
 class MLP(nn.Module):
     """Stateless one layer MLP"""
-
     features: int
 
     @nn.compact
@@ -35,7 +34,7 @@ class MyGCN(nn.Module):
 
         # Apply learnable fn phi(n) to each node n in V
         for i, feat in enumerate(self.features):
-            nodes = nn.Dense(feat, name=f"layer{i}")(nodes)
+            nodes = nn.Dense(feat, name=f'layer{i}')(nodes)
             nodes = nn.relu(nodes)
 
         # Add self-edges
@@ -44,12 +43,16 @@ class MyGCN(nn.Module):
             receivers = jnp.concatenate((receivers, jnp.arange(nodes.shape[0])))
 
         # Calculate node degrees and normalize features
-        node_deg = jax.ops.segment_sum(jnp.ones_like(receivers), senders)
+        # Need to explicitly tell segment_sum the number of segments to be jittable
+        node_deg = jax.ops.segment_sum(jnp.ones_like(receivers), senders, nodes.shape[0])
 
         # Non-symmetric norm by degrees (undirected)
         nodes = nodes * jax.lax.reciprocal(jnp.maximum(node_deg, 1.0))[:, None]
-        nodes = self.aggregation_fn(nodes[senders], receivers)
+        nodes = self.aggregation_fn(nodes[senders], receivers, nodes.shape[0])
 
-        if self.add_self_edges is True:  # TODO: Change this to a kwargs dict
+        return nodes
+        """
+        if self.add_self_edges is True: #TODO: Change this to a kwargs dict
             return new_gt._replace(nodes=nodes, senders=senders, receivers=receivers)
         return new_gt.replace(nodes=nodes)
+        """

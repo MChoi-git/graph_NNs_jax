@@ -28,7 +28,7 @@ def load_data(root: str, prefix: str) -> List[Union[Dict[str, Any], np.ndarray]]
     Returns:
         data (list): List of
     """
-    # TODO: List[Dict[str, Any], np.ndarray, Dict[str, List[int]], Dict[str, int]]
+    #TODO: List[Dict[str, Any], np.ndarray, Dict[str, List[int]], Dict[str, int]]
     file_suffixes = ["-G.json", "-feats.npy", "-id_map.json", "-class_map.json"]
     filepaths = [Path(root + "/" + prefix + sfx) for sfx in file_suffixes]
     data = [
@@ -40,11 +40,7 @@ def load_data(root: str, prefix: str) -> List[Union[Dict[str, Any], np.ndarray]]
 def normalize_features(graph: Dict, feats: np.ndarray) -> np.ndarray:
     """Normalize the training node features"""
     train_ids = np.array(
-        [
-            k
-            for k, v in graph["nodes"].items()
-            if v["test"] is False and v["val"] is False
-        ]
+        [k for k, v in graph['nodes'].items() if v['test'] is False and v['val'] is False]
     )
     train_feats = feats[train_ids]
     scaler = StandardScaler()
@@ -59,7 +55,7 @@ def load_graph_data(
     """Make the batch iterator for the graph NN
     Args:
     """
-    # TODO: Type hint
+    #TODO: Type hint
     dset_path = Path(dset_dir)
     assert dset_path.is_dir()
 
@@ -71,7 +67,7 @@ def decode_graph(graph, id_map):
     """Decode graph node ids according to id_map
     Args:
     """
-    # TODO: Type hint
+    #TODO: Type hint
     for i in tqdm(range(len(graph["nodes"]))):
         graph["nodes"][i]["id"] = id_map[graph["nodes"][i]["id"]]
     return graph
@@ -81,7 +77,7 @@ def decode_class_map(class_map, id_map):
     """Decode class_map node ids according to id_map
     Args:
     """
-    # TODO: Type hint
+    #TODO: Type hint
     decoded_class_map = {}
     for k, v in class_map.items():
         decoded_class_map[f"{id_map[k]}"] = v
@@ -92,7 +88,7 @@ def construct_better_graph(graph):
     """Construct a graph representation for easy partitioning of splits
     Args:
     """
-    # TODO: Type hint
+    #TODO: Type hint
     better_graph = {
         "directed": False,
         "graph": None,
@@ -163,7 +159,7 @@ def make_graph_tuple(graph: Dict[str, Any], feats: np.ndarray) -> jraph.GraphsTu
     edges = jnp.ones((senders.size, 1))
 
     # Declare number of nodes and edges
-    n_nodes = len(graph["nodes"])
+    n_nodes = len(graph['nodes'])
     n_edges = senders.size
 
     gt = jraph.GraphsTuple(
@@ -182,11 +178,13 @@ def setup(dset_dir: str, prefix: str):
     """Parse graph and feature data into a jraph compatible GraphsTuple
     Args:
     """
-    # TODO: Fix typehints for all functions
-    graph, feats, id_map, class_map = load_graph_data(dset_dir, prefix)
+    #TODO: Fix typehints for all functions
+    graph, feats, id_map, class_map = load_graph_data(
+        dset_dir, prefix
+    )
 
     graph = decode_graph(graph, id_map)
-    graph = construct_better_graph(graph)
+    graph = construct_better_graph(graph) 
 
     class_map = decode_class_map(class_map, id_map)
 
@@ -194,4 +192,4 @@ def setup(dset_dir: str, prefix: str):
 
     gt = make_graph_tuple(graph, normed_feats)
 
-    return gt, class_map, normed_feats
+    return gt, class_map
