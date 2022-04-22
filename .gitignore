@@ -2,8 +2,9 @@
 datasets/
 
 # misc
-__pycache__/
+*__pycache__/
 *.swp
+.nfs*
 
 # dirs
 misc/
